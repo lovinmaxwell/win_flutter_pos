@@ -89,6 +89,12 @@ class _SerialBusPageState extends State<SerialBusPage> {
   String _counterVal = "";
   var availablePorts = [];
 
+  // static const double inch = 96.0;
+  // static const double cm = inch / 2.54;
+  // static const double mm = inch / 25.4;
+
+  static const PdfPageFormat inch3 = PdfPageFormat(288, double.infinity, marginAll: 5);
+
   List<TreeViewItem> _avalPorts = [];
 
   void _initPorts() {
@@ -161,7 +167,7 @@ class _SerialBusPageState extends State<SerialBusPage> {
                   //   _printPdf(bytes);
                   // });
 
-                  _generatePdf(PdfPageFormat.roll80, "POS").then((value) => _printPdf(value));
+                  _generatePdf(inch3, "POS").then((value) => _printPdf(value));
                 },
               ),
             )
@@ -201,7 +207,7 @@ class _SerialBusPageState extends State<SerialBusPage> {
   }
 
   Future<Uint8List> _generatePdf(PdfPageFormat format, String title) async {
-    final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
+    final pdf = pw.Document();
     final font = await PdfGoogleFonts.nunitoExtraLight();
 
     List<pw.Widget> rows = [];
@@ -209,7 +215,7 @@ class _SerialBusPageState extends State<SerialBusPage> {
 
     var arabicFont = pw.Font.ttf(await rootBundle.load("assets/fonts/HacenQatarRegular.ttf"));
 
-    for (var i = 0; i < 50; i++) {
+    for (var i = 0; i < 100; i++) {
       int ss = i * Random().nextInt(100);
       ptotal += i * ss;
       rows.add(pw.Row(
@@ -221,50 +227,92 @@ class _SerialBusPageState extends State<SerialBusPage> {
           ]));
     }
     final image = await imageFromAssetBundle('assets/logo.png');
-    pdf.addPage(
-      pw.Page(
+    // pdf.addPage(
+    //   pw.MultiPage(
+    //     theme: pw.ThemeData.withFont(
+    //       base: arabicFont,
+    //     ),
+    //     // pageFormat: format,
+    //     pageFormat: PdfPageFormat.roll80.copyWith(marginBottom: 1.5 * PdfPageFormat.mm),
+    //     build: (context) {
+    //       return [
+    //         pw.SizedBox(
+    //           width: double.infinity,
+    //           child: pw.FittedBox(
+    //             child: pw.Text(title, style: pw.TextStyle(font: font)),
+    //           ),
+    //         ),
+    //         pw.SizedBox(
+    //           // width: 40,
+    //           child: pw.Image(image),
+    //         ),
+    //         pw.SizedBox(
+    //           // width: double.infinity,
+    //           child: pw.Column(children: [
+    //             ...rows,
+    //             pw.FittedBox(
+    //                 child: pw.Text(
+    //                     "1---------------------------------------------------------------------------------1")),
+    //             pw.Row(
+    //                 crossAxisAlignment: pw.CrossAxisAlignment.end,
+    //                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+    //                 children: [
+    //                   pw.Text("Total"),
+    //                   pw.Text("$ptotal"),
+    //                 ]),
+    //             pw.FittedBox(
+    //                 child: pw.Text(
+    //                     "1---------------------------------------------------------------------------------1")),
+    //           ]),
+    //         ),
+    //         pw.SizedBox(height: 20),
+    //       ];
+    //     },
+    //   ),
+    // );
+
+    pdf.addPage(pw.MultiPage(
+        maxPages: 200,
         theme: pw.ThemeData.withFont(
           base: arabicFont,
         ),
-        pageFormat: format,
+        pageFormat: PdfPageFormat.a4.copyWith(
+            width: 80 * PdfPageFormat.mm,
+            marginTop: 0,
+            marginBottom: 0,
+            marginLeft: 2 * PdfPageFormat.mm,
+            marginRight: 2 * PdfPageFormat.mm),
         build: (context) {
-          return pw.Column(
-            children: [
-              pw.SizedBox(
-                width: double.infinity,
-                child: pw.FittedBox(
-                  child: pw.Text(title, style: pw.TextStyle(font: font)),
-                ),
-              ),
-              pw.SizedBox(
-                // width: 40,
-                child: pw.Image(image),
-              ),
-              pw.SizedBox(
-                // width: double.infinity,
-                child: pw.Column(children: [
-                  ...rows,
-                  pw.FittedBox(
-                      child: pw.Text(
-                          "1---------------------------------------------------------------------------------1")),
-                  pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.end,
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text("Total"),
-                        pw.Text("$ptotal"),
-                      ]),
-                  pw.FittedBox(
-                      child: pw.Text(
-                          "1---------------------------------------------------------------------------------1")),
-                ]),
-              ),
-              pw.SizedBox(height: 20),
-            ],
-          );
-        },
-      ),
-    );
+          return [
+            pw.SizedBox(height: 20),
+            pw.Text('Hello'),
+            pw.Text('World'),
+            pw.SizedBox(
+              // width: 40,
+              child: pw.Image(image),
+            ),
+            pw.SizedBox(
+              // width: double.infinity,
+              child: pw.Column(children: [
+                ...rows,
+                pw.FittedBox(
+                    child: pw.Text(
+                        "1---------------------------------------------------------------------------------1")),
+                pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text("Total"),
+                      pw.Text("$ptotal"),
+                    ]),
+                pw.FittedBox(
+                    child: pw.Text(
+                        "1---------------------------------------------------------------------------------1")),
+              ]),
+            ),
+            pw.SizedBox(height: 20),
+          ];
+        }));
 
     return pdf.save();
   }
@@ -288,8 +336,110 @@ class _SerialBusPageState extends State<SerialBusPage> {
 // }
 
 Future<void> _printPdf(Uint8List data) async {
+  // String items = '''
+  //     ''';
+  // var html = """
+  //   <!DOCTYPE html>
+  //   <html>
+  //   <head>
+  //   <meta name="viewport" content="width=device-width, initial-scale=1">
+  //   <link rel="stylesheet" href=
+  //   "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+  //       <style>
+
+  //         .invoice-box {
+  //           max-width:1000px;
+  //           margin: auto;
+  //           padding: 8px;
+  //           border: 1px solid #eee;
+  //           box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  //           font-size: 8px;
+  //           line-height: 24px;
+  //           font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+  //           color: #555;
+  //         }
+  //           .invoice-box table {
+  //           width: 100%;
+  //           line-height: inherit;
+  //           text-align: center;
+  //         }
+
+  //         .invoice-box table td {
+  //           padding: 10px;
+  //           vertical-align: top;
+  //         }
+
+  //         .invoice-box table tr.top table td {
+  //           padding-bottom: 5px;
+  //         }
+
+  //   * {
+  //     box-sizing: border-box;
+  //   }
+
+  //   .column {
+  //     float: right;
+  //     width:23%;
+
+  //     padding: 16px;
+
+  //   }
+  //   .header{
+  //   text-align:center;
+  //   }
+
+  //   .row:after {
+  //     content: "";
+  //     display: table;
+  //     clear: both;
+  //   }
+
+  //   </style>
+  //   </head>
+  //   <body>
+  //   <h2 class="header">كشف حساب</h2>
+  //   <h3 class="header">بيانات الزبون</h3>
+  //   <table>
+  //   <tr>
+  //   <div class="row">
+  //     <div class="column" >
+  //       <h4>المبلغ</h4>
+  //       <p></p>
+  //     </div>
+
+  //     <div class="column" >
+
+  //       <h4>نوع العملية</h4>
+
+  //     </div>
+
+  //     <div class="column" >
+  //       <h4>تاريخ</h4>
+
+  //     </div>
+  //     <div class="column" >
+  //       <h4>وصف</h4>
+
+  //     </div>
+  //   </div>
+  //   </tr>
+  //   $items
+  //   </table>
+  //   <div>
+  //   <p class="header">------------------------</p>
+  //   <p>---</p>
+  //   <p>--</p>
+  //   <p>-</p>
+  //   </div>
+  //   </body>
+  //   </html>""";
+
   final printers = await Printing.listPrinters();
   print(printers);
   await Printing.directPrintPdf(
       printer: printers.firstWhere((element) => element.isDefault == true), onLayout: (_) => data);
+  //     printer: printers.firstWhere((element) => element.isDefault == true), onLayout: (format) async => await Printing.convertHtml(
+  //   format: format,
+  //   html: html,
+  // ));
 }
