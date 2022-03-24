@@ -125,8 +125,45 @@ class _SerialBusPageState extends State<SerialBusPage> {
                   onPressed: () {
                     List<int> list = 'Hi Testing asdasd'.codeUnits;
                     Uint8List bytes = Uint8List.fromList(list);
-                    port.write(bytes);
+                    SerialPortConfig config = SerialPortConfig();
+                    config.baudRate = 9600;
+                    config.bits = 8;
+                    // config.parity = 9600;
+                    port.config = config;
+                    port.open(mode: SerialPortMode.write);
+                    if (port.openWrite()) {
+                      port.write(bytes);
+                      showSnackbar(
+                        context,
+                        const Snackbar(
+                          content: Text('Serial Port is open !!!'),
+                        ),
+                      );
+                    } else {
+                      showSnackbar(
+                        context,
+                        const Snackbar(
+                          content: Text('Serial Port is close !!!'),
+                        ),
+                      );
+                    }
+                    port.close();
+                    port.dispose();
+                    // SerialPort sp = new SerialPort();
                     print(bytes);
+
+                    // sp.PortName = "COM1";
+                    // sp.BaudRate = 9600;
+                    // sp.Parity = Parity.None;
+                    // sp.DataBits = 8;
+                    // sp.StopBits = StopBits.One;
+                    // sp.Open();
+                    // sp.WriteLine("                                        ");
+                    // sp.WriteLine("Hi welocme here");
+
+                    // sp.Close();
+                    // sp.Dispose();
+                    // sp = null;
                     try {} on SerialPortError catch (e) {
                       print(SerialPort.lastError);
                     }
@@ -270,14 +307,19 @@ class _SerialBusPageState extends State<SerialBusPage> {
     //     },
     //   ),
     // );
+    const double inch = 72.0;
+    const double cm = inch / 2.54;
+    const double mm = inch / 25.4;
+    const PdfPageFormat a4 = PdfPageFormat(21.0 * cm, 29.7 * cm, marginAll: 0);
 
     pdf.addPage(pw.MultiPage(
         maxPages: 200,
         theme: pw.ThemeData.withFont(
           base: arabicFont,
         ),
-        pageFormat: PdfPageFormat.a4.copyWith(
-            width: 80 * PdfPageFormat.mm,
+        margin: const pw.EdgeInsets.fromLTRB(2 * PdfPageFormat.mm, 0, 2 * PdfPageFormat.mm, -4),
+        pageFormat: a4.copyWith(
+            width: 75 * PdfPageFormat.mm,
             marginTop: 0,
             marginBottom: 0,
             marginLeft: 2 * PdfPageFormat.mm,
